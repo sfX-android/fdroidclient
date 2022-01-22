@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
 
         // AppDetailsActivity and RepoDetailsActivity set different NFC actions, so reset here
         NfcHelper.setAndroidBeam(this, getApplication().getPackageName());
-        checkForAddRepoIntent(getIntent());
+        //checkForAddRepoIntent(getIntent());
     }
 
     @Override
@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         // The end result is that this method will be called twice for one add repo intent. Once
         // here and once in onResume(). However, the method deals with this by ensuring it only
         // handles the same intent once.
-        checkForAddRepoIntent(intent);
+        //checkForAddRepoIntent(intent);
     }
 
     @Override

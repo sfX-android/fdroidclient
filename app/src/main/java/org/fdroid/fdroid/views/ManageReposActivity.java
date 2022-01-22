@@ -129,7 +129,7 @@ public class ManageReposActivity extends AppCompatActivity
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 if (menuItem.getItemId() == R.id.action_add_repo) {
-                    showAddRepo();
+                    //showAddRepo();
                     return true;
                 }
                 return false;
@@ -224,6 +224,7 @@ public class ManageReposActivity extends AppCompatActivity
     }
 
     private void showAddRepo() {
+        if (true) { return; }
         /*
          * If there is text in the clipboard, and it looks like a URL, use that.
          * Otherwise use "https://" as default repo string.
@@ -263,10 +264,11 @@ public class ManageReposActivity extends AppCompatActivity
         if (TextUtils.isEmpty(text)) {
             text = DEFAULT_NEW_REPO_TEXT;
         }
-        showAddRepo(text, fingerprint, username, password != null ? password.toString() : null);
+        //showAddRepo(text, fingerprint, username, password != null ? password.toString() : null);
     }
 
     private void showAddRepo(String newAddress, String newFingerprint, String username, String password) {
+        if (true) { return; }
         if (hasDisallowInstallUnknownSources(this)) {
             String msg = getDisallowInstallUnknownSourcesErrorMessage(this);
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
@@ -302,7 +304,6 @@ public class ManageReposActivity extends AppCompatActivity
          * checks that the repo type matches, e.g. "repo" or "archive".
          */
         AddRepo(String newAddress, String newFingerprint, final String username, final String password) {
-
             context = ManageReposActivity.this;
 
             for (Repo repo : RepoProvider.Helper.all(context)) {
@@ -324,15 +325,14 @@ public class ManageReposActivity extends AppCompatActivity
             final EditText uriEditText = uriEditTextLayout.getEditText();
             final EditText fingerprintEditText = fingerprintEditTextLayout.getEditText();
 
-            addRepoDialogBuilder.setTitle(R.string.repo_add_title);
+            //addRepoDialogBuilder.setTitle(R.string.repo_add_title);
             addRepoDialogBuilder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    if (finishAfterAddingRepo) {
-                        finish();
-                    }
-                }
+            @Override public void onClick(DialogInterface dialog, int which) {
+            dialog.dismiss();
+            if (finishAfterAddingRepo) {
+            finish();
+            }
+            }
             });
 
             // HACK:
@@ -357,90 +357,90 @@ public class ManageReposActivity extends AppCompatActivity
 
             addRepoDialog = addRepoDialogBuilder.show();
 
-            // This must be *after* addRepoDialog.show() otherwise getButtion() returns null:
-            // https://code.google.com/p/android/issues/detail?id=6360
-            addRepoDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
+                // This must be *after* addRepoDialog.show() otherwise getButtion() returns null:
+                // https://code.google.com/p/android/issues/detail?id=6360
+                addRepoDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
 
-                            String url = uriEditText.getText().toString();
+                                String url = uriEditText.getText().toString();
 
-                            try {
-                                url = AddRepoIntentService.normalizeUrl(url);
-                            } catch (URISyntaxException e) {
-                                invalidUrl();
-                                return;
-                            }
+                                try {
+                                    url = AddRepoIntentService.normalizeUrl(url);
+                                } catch (URISyntaxException e) {
+                                    invalidUrl();
+                                    return;
+                                }
 
-                            String fp = fingerprintEditText.getText().toString();
-                            // remove any whitespace from fingerprint
-                            fp = fp.replaceAll("\\s", "");
+                                String fp = fingerprintEditText.getText().toString();
+                                // remove any whitespace from fingerprint
+                                fp = fp.replaceAll("\\s", "");
 
-                            switch (addRepoState) {
-                                case DOESNT_EXIST:
-                                    prepareToCreateNewRepo(url, fp, username, password);
-                                    break;
+                                switch (addRepoState) {
+                                    case DOESNT_EXIST:
+                                        prepareToCreateNewRepo(url, fp, username, password);
+                                        break;
 
-                                case IS_SWAP:
-                                    Utils.debugLog(TAG, "Removing existing swap repo " + url
-                                            + " before adding new repo.");
-                                    Repo repo = RepoProvider.Helper.findByAddress(context, url);
-                                    RepoProvider.Helper.remove(context, repo.getId());
-                                    prepareToCreateNewRepo(url, fp, username, password);
-                                    break;
+                                    case IS_SWAP:
+                                        Utils.debugLog(TAG, "Removing existing swap repo " + url
+                                                + " before adding new repo.");
+                                        Repo repo = RepoProvider.Helper.findByAddress(context, url);
+                                        RepoProvider.Helper.remove(context, repo.getId());
+                                        prepareToCreateNewRepo(url, fp, username, password);
+                                        break;
 
-                                case EXISTS_DISABLED:
-                                case EXISTS_UPGRADABLE_TO_SIGNED:
-                                case EXISTS_ADD_MIRROR:
-                                    updateAndEnableExistingRepo(url, fp);
-                                    finishedAddingRepo();
-                                    break;
+                                    case EXISTS_DISABLED:
+                                    case EXISTS_UPGRADABLE_TO_SIGNED:
+                                    case EXISTS_ADD_MIRROR:
+                                        updateAndEnableExistingRepo(url, fp);
+                                        finishedAddingRepo();
+                                        break;
 
-                                default:
-                                    finishedAddingRepo();
-                                    break;
+                                    default:
+                                        finishedAddingRepo();
+                                        break;
+                                }
                             }
                         }
+                );
+
+                addButton = addRepoDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                overwriteMessage = (TextView) view.findViewById(R.id.overwrite_message);
+                overwriteMessage.setVisibility(View.GONE);
+                defaultTextColour = overwriteMessage.getTextColors();
+
+                if (newFingerprint != null) {
+                    fingerprintEditText.setText(newFingerprint);
+                }
+
+                if (newAddress != null) {
+                    // This trick of emptying text then appending, rather than just setting in
+                    // the first place, is necessary to move the cursor to the end of the input.
+                    uriEditText.setText("");
+                    uriEditText.append(newAddress);
+                }
+
+                final TextWatcher textChangedListener = new TextWatcher() {
+
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                     }
-            );
 
-            addButton = addRepoDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            overwriteMessage = (TextView) view.findViewById(R.id.overwrite_message);
-            overwriteMessage.setVisibility(View.GONE);
-            defaultTextColour = overwriteMessage.getTextColors();
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
 
-            if (newFingerprint != null) {
-                fingerprintEditText.setText(newFingerprint);
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        validateRepoDetails(uriEditText.getText().toString(), fingerprintEditText.getText().toString());
+                    }
+                };
+
+                uriEditText.addTextChangedListener(textChangedListener);
+                fingerprintEditText.addTextChangedListener(textChangedListener);
+                validateRepoDetails(newAddress == null ? "" : newAddress, newFingerprint == null ? "" : newFingerprint);
             }
-
-            if (newAddress != null) {
-                // This trick of emptying text then appending, rather than just setting in
-                // the first place, is necessary to move the cursor to the end of the input.
-                uriEditText.setText("");
-                uriEditText.append(newAddress);
-            }
-
-            final TextWatcher textChangedListener = new TextWatcher() {
-
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    validateRepoDetails(uriEditText.getText().toString(), fingerprintEditText.getText().toString());
-                }
-            };
-
-            uriEditText.addTextChangedListener(textChangedListener);
-            fingerprintEditText.addTextChangedListener(textChangedListener);
-            validateRepoDetails(newAddress == null ? "" : newAddress, newFingerprint == null ? "" : newFingerprint);
-        }
 
         /**
          * Gets the repo type as represented by the final segment of the path. This is
@@ -819,8 +819,8 @@ public class ManageReposActivity extends AppCompatActivity
         NewRepoConfig newRepoConfig = new NewRepoConfig(this, intent);
         if (newRepoConfig.isValidRepo()) {
             finishAfterAddingRepo = intent.getBooleanExtra(EXTRA_FINISH_AFTER_ADDING_REPO, true);
-            showAddRepo(newRepoConfig.getRepoUriString(), newRepoConfig.getFingerprint(),
-                    newRepoConfig.getUsername(), newRepoConfig.getPassword());
+            //showAddRepo(newRepoConfig.getRepoUriString(), newRepoConfig.getFingerprint(),
+            //        newRepoConfig.getUsername(), newRepoConfig.getPassword());
             checkIfNewRepoOnSameWifi(newRepoConfig);
         } else if (newRepoConfig.getErrorMessage() != null) {
             Toast.makeText(this, newRepoConfig.getErrorMessage(), Toast.LENGTH_LONG).show();
